@@ -1,0 +1,212 @@
+import { createContext, useContext, useState, useMemo } from "react";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+
+const ThemeContext = createContext();
+
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const FONTS = {
+  display: "'Playfair Display', serif",
+  body:    "'DM Sans', sans-serif",
+};
+
+const LIGHT = {
+  background: { default: "#f1f5f9", paper: "#ffffff" },
+  divider: "#e2e8f0",
+  text: {
+    primary:   "#0f172a",
+    secondary: "#64748b",
+    disabled:  "#94a3b8",
+  },
+};
+
+const DARK = {
+  background: { default: "#0f172a", paper: "#1e293b" },
+  divider: "rgba(255,255,255,0.07)",
+  text: {
+    primary:   "#f1f5f9",
+    secondary: "#94a3b8",
+    disabled:  "#475569",
+  },
+};
+
+// ── Theme builder ─────────────────────────────────────────────────────────────
+const buildTheme = (mode) =>
+  createTheme({
+    palette: {
+      mode,
+      primary:   { main: "#2563eb", light: "#3b82f6", dark: "#1d4ed8" },
+      secondary: { main: "#0891b2", light: "#22d3ee", dark: "#0e7490" },
+      error:     { main: "#dc2626" },
+      warning:   { main: "#f59e0b" },
+      success:   { main: "#10b981" },
+      ...(mode === "light" ? LIGHT : DARK),
+    },
+
+    typography: {
+      fontFamily: FONTS.body,
+      h1: { fontFamily: FONTS.display, fontWeight: 700 },
+      h2: { fontFamily: FONTS.display, fontWeight: 700 },
+      h3: { fontFamily: FONTS.display, fontWeight: 700 },
+      h4: { fontFamily: FONTS.display, fontWeight: 700 },
+      h5: { fontFamily: FONTS.display, fontWeight: 600 },
+      h6: { fontFamily: FONTS.display, fontWeight: 600 },
+      button: { fontFamily: FONTS.body, fontWeight: 600, textTransform: "none" },
+      caption: { fontFamily: FONTS.body, fontSize: "0.72rem" },
+    },
+
+    shape: { borderRadius: 10 },
+
+    shadows: [
+      "none",
+      "0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)",
+      "0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.06)",
+      "0 4px 6px rgba(0,0,0,0.05), 0 10px 30px rgba(0,0,0,0.08)",
+      "0 8px 16px rgba(0,0,0,0.08), 0 20px 48px rgba(0,0,0,0.10)",
+      ...Array(20).fill("none"),
+    ],
+
+    components: {
+      MuiCssBaseline: {
+        styleOverrides: `
+          @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap');
+          *, *::before, *::after { box-sizing: border-box; }
+          body { margin: 0; }
+          ::-webkit-scrollbar { width: 5px; height: 5px; }
+          ::-webkit-scrollbar-track { background: transparent; }
+          ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+          ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        `,
+      },
+
+      MuiPaper: {
+        defaultProps: { elevation: 1 },
+        styleOverrides: {
+          root: ({ theme }) => ({
+            backgroundImage: "none",
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 16,
+          }),
+        },
+      },
+
+      MuiButton: {
+        defaultProps: { disableElevation: true },
+        styleOverrides: {
+          root: {
+            borderRadius: 9,
+            fontFamily: FONTS.body,
+            fontWeight: 600,
+            fontSize: "0.845rem",
+            padding: "8px 18px",
+            textTransform: "none",
+            transition: "all 0.18s ease",
+          },
+          containedPrimary: {
+            background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+            "&:hover": { background: "linear-gradient(135deg, #1d4ed8, #1e3a8a)" },
+          },
+        },
+      },
+
+      MuiCard: {
+        styleOverrides: {
+          root: ({ theme }) => ({
+            backgroundImage: "none",
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 16,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04)",
+          }),
+        },
+      },
+
+      MuiTableHead: {
+        styleOverrides: {
+          root: ({ theme }) => ({
+            "& .MuiTableCell-head": {
+              fontFamily: FONTS.body,
+              fontWeight: 700,
+              fontSize: "0.72rem",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: theme.palette.text.secondary,
+              borderBottom: `1px solid ${theme.palette.divider}`,
+              padding: "10px 16px",
+            },
+          }),
+        },
+      },
+
+      MuiTableCell: {
+        styleOverrides: {
+          root: ({ theme }) => ({
+            fontFamily: FONTS.body,
+            fontSize: "0.845rem",
+            color: theme.palette.text.primary,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            padding: "12px 16px",
+          }),
+        },
+      },
+
+      MuiChip: {
+        styleOverrides: {
+          root: {
+            fontFamily: FONTS.body,
+            fontWeight: 600,
+            fontSize: "0.72rem",
+            borderRadius: 99,
+          },
+        },
+      },
+
+      MuiTextField: {
+        defaultProps: { variant: "outlined", size: "small" },
+        styleOverrides: {
+          root: {
+            "& .MuiOutlinedInput-root": {
+              fontFamily: FONTS.body,
+              borderRadius: 9,
+              fontSize: "0.875rem",
+            },
+          },
+        },
+      },
+
+      MuiTooltip: {
+        defaultProps: { arrow: true },
+        styleOverrides: {
+          tooltip: {
+            fontFamily: FONTS.body,
+            fontSize: "0.72rem",
+            fontWeight: 500,
+            background: "#0f172a",
+            borderRadius: 7,
+            padding: "6px 10px",
+          },
+          arrow: { color: "#0f172a" },
+        },
+      },
+    },
+  });
+
+// ── Provider ──────────────────────────────────────────────────────────────────
+export const ThemeProviderCustom = ({ children }) => {
+  const [mode, setMode] = useState("light");
+
+  const toggleTheme = () =>
+    setMode((prev) => (prev === "light" ? "dark" : "light"));
+
+  const theme = useMemo(() => buildTheme(mode), [mode]);
+
+  return (
+    <ThemeContext.Provider value={{ mode, darkMode: mode === "dark", toggleTheme }}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        {children}
+      </ThemeProvider>
+    </ThemeContext.Provider>
+  );
+};
+
+export const useThemeCustom = () => useContext(ThemeContext);
